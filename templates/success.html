@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Published &mdash; Blog Writer AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,700;1,400&display=swap" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f8f7f4; --surface: #fff; --border: #e4e2dc;
+      --text: #1a1a18; --muted: #6b6860; --accent: #2563eb;
+      --green: #16a34a; --green-bg: #f0fdf4; --green-border: #bbf7d0;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--text); padding: 18px 40px; display: flex; align-items: center; gap: 12px; }
+    header .logo { font-family: 'Merriweather', serif; font-size: 1.2rem; color: #fff; }
+    header .badge { background: var(--green); color: #fff; font-size: 0.65rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; }
+    main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 60px 24px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 56px 48px; width: 100%; max-width: 600px; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+    .checkmark { font-size: 3.5rem; margin-bottom: 20px; }
+    h2 { font-family: 'Merriweather', serif; font-size: 1.75rem; margin-bottom: 12px; }
+    .subtitle { color: var(--muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 36px; }
+    .publish-status { background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 12px; padding: 20px 24px; margin-bottom: 32px; text-align: left; }
+    .publish-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+    .publish-row:not(:last-child) { border-bottom: 1px solid var(--green-border); }
+    .pub-icon { font-size: 1.2rem; width: 28px; text-align: center; }
+    .pub-name { font-weight: 600; font-size: 0.9rem; flex: 1; }
+    .pub-status { font-size: 0.8rem; color: var(--green); font-weight: 600; background: #dcfce7; padding: 3px 10px; border-radius: 20px; }
+    .pub-status.pending { color: #92400e; background: #fef3c7; }
+    .actions { display: flex; gap: 12px; justify-content: center; }
+    .btn-primary { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 12px 24px; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary { background: transparent; color: var(--text); border: 1.5px solid var(--border); border-radius: 10px; padding: 12px 24px; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s; }
+    .btn-secondary:hover { background: var(--bg); }
+
+    /* inline blog preview collapsed */
+    details { text-align: left; margin-top: 28px; border-top: 1px solid var(--border); padding-top: 20px; }
+    summary { font-size: 0.85rem; font-weight: 600; cursor: pointer; color: var(--muted); margin-bottom: 16px; }
+    .blog-preview { font-size: 0.875rem; line-height: 1.7; max-height: 400px; overflow-y: auto; }
+    .blog-preview h1 { font-family: 'Merriweather', serif; font-size: 1.25rem; margin-bottom: 12px; }
+    .blog-preview h2 { font-size: 1rem; font-weight: 700; margin-top: 20px; margin-bottom: 8px; }
+    .blog-preview p { color: #374151; margin-bottom: 12px; }
+    .blog-preview code { background: #f3f4f6; padding: 1px 5px; border-radius: 4px; font-size: 0.82em; }
+    .blog-preview pre { background: #1e293b; padding: 14px; border-radius: 8px; overflow-x: auto; }
+    .blog-preview pre code { color: #e2e8f0; background: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="logo">Blog Writer AI</span>
+    <span class="badge">Published</span>
+  </header>
+  <main>
+    <div class="card">
+      <div class="checkmark">&#10003;</div>
+      <h2>Blog approved!</h2>
+      <p class="subtitle">
+        <strong>{{ plan_title }}</strong><br />
+        Your blog has been approved and is ready to publish.
+        {% if revision_count > 0 %}It went through {{ revision_count }} revision{{ 's' if revision_count != 1 else '' }}.{% endif %}
+      </p>
+
+      <div class="publish-status">
+        <div class="publish-row">
+          <span class="pub-icon">📝</span>
+          <span class="pub-name">Hashnode</span>
+          <span class="pub-status pending">Coming soon</span>
+        </div>
+        <div class="publish-row">
+          <span class="pub-icon">💼</span>
+          <span class="pub-name">LinkedIn</span>
+          <span class="pub-status pending">Coming soon</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a href="/" class="btn-primary">Write another blog</a>
+        <a href="/review/{{ job_id }}" class="btn-secondary">View blog</a>
+      </div>
+
+      <details>
+        <summary>Preview approved blog</summary>
+        <div class="blog-preview" id="inline-preview">Loading…</div>
+      </details>
+    </div>
+  </main>
+
+  <script>
+    const RAW = {{ content | tojson }};
+    marked.setOptions({ gfm: true });
+    document.getElementById('inline-preview').innerHTML = marked.parse(RAW);
+  </script>
+</body>
+</html>

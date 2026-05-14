@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog Writer AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,700;1,400&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8f7f4;
+      --surface: #ffffff;
+      --border: #e4e2dc;
+      --text: #1a1a18;
+      --muted: #6b6860;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-light: #eff6ff;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--text);
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header .logo {
+      font-family: 'Merriweather', serif;
+      font-size: 1.2rem;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+
+    header .badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+
+    .card-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-family: 'Merriweather', serif;
+      font-size: 1.9rem;
+      line-height: 1.25;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--bg);
+      resize: vertical;
+      min-height: 110px;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    textarea::placeholder { color: #b0aea8; }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .submit-row {
+      margin-top: 28px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    button[type="submit"] {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 28px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button[type="submit"]:hover { background: var(--accent-hover); }
+    button[type="submit"]:active { transform: scale(0.98); }
+
+    .examples {
+      margin-top: 40px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+    }
+
+    .examples p {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+
+    .example-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .chip:hover {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="logo">Blog Writer AI</span>
+    <span class="badge">LangGraph</span>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="card-eyebrow">AI-Powered Technical Writing</div>
+      <h1>What should we write about?</h1>
+      <p class="subtitle">
+        Enter a topic and the AI agent will research, plan, write, and ask for your review
+        before publishing anywhere.
+      </p>
+
+      <form method="post" action="/generate">
+        <label for="topic">Blog topic</label>
+        <textarea
+          id="topic"
+          name="topic"
+          placeholder="e.g. How vector databases power modern AI applications"
+          required
+          minlength="10"
+        ></textarea>
+        <div class="hint">Be specific — include audience, angle, or format if you have one.</div>
+
+        <div class="submit-row">
+          <button type="submit">Generate Blog &rarr;</button>
+        </div>
+      </form>
+
+      <div class="examples">
+        <p>Try an example</p>
+        <div class="example-chips">
+          <div class="chip" onclick="fill(this)">The rise of agentic AI in 2025</div>
+          <div class="chip" onclick="fill(this)">RAG vs fine-tuning: when to use each</div>
+          <div class="chip" onclick="fill(this)">Getting started with LangGraph for beginners</div>
+          <div class="chip" onclick="fill(this)">State of LLM evaluation in 2025</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>Powered by LangGraph &middot; Ollama &middot; Tavily</footer>
+
+  <script>
+    function fill(el) {
+      document.getElementById('topic').value = el.textContent.trim();
+      document.getElementById('topic').focus();
+    }
+  </script>
+</body>
+</html>

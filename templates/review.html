@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Review &mdash; Blog Writer AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,700;1,400&display=swap" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8f7f4;
+      --surface: #ffffff;
+      --border: #e4e2dc;
+      --text: #1a1a18;
+      --muted: #6b6860;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-light: #eff6ff;
+      --green: #16a34a;
+      --green-light: #f0fdf4;
+      --red: #dc2626;
+      --red-light: #fef2f2;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--text);
+      padding: 14px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    header .logo { font-family: 'Merriweather', serif; font-size: 1.1rem; color: #fff; }
+    header .badge { background: var(--accent); color: #fff; font-size: 0.65rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; }
+    .header-meta { font-size: 0.8rem; color: #9ca3af; }
+
+    /* ── Layout ── */
+    .page-wrap {
+      display: flex;
+      flex: 1;
+      gap: 0;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px;
+      align-items: flex-start;
+    }
+
+    /* ── Blog Preview ── */
+    .preview-panel {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px 56px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      max-width: 760px;
+    }
+
+    /* Markdown styles */
+    .preview-panel h1 {
+      font-family: 'Merriweather', serif;
+      font-size: 2rem;
+      line-height: 1.25;
+      color: var(--text);
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+    }
+    .preview-panel h2 {
+      font-family: 'Merriweather', serif;
+      font-size: 1.3rem;
+      margin-top: 36px;
+      margin-bottom: 14px;
+      color: var(--text);
+    }
+    .preview-panel h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-top: 24px;
+      margin-bottom: 10px;
+    }
+    .preview-panel p {
+      line-height: 1.75;
+      color: #374151;
+      margin-bottom: 16px;
+      font-size: 0.975rem;
+    }
+    .preview-panel ul, .preview-panel ol {
+      padding-left: 24px;
+      margin-bottom: 16px;
+    }
+    .preview-panel li {
+      line-height: 1.7;
+      color: #374151;
+      margin-bottom: 4px;
+      font-size: 0.975rem;
+    }
+    .preview-panel code {
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-family: 'Menlo', 'Consolas', monospace;
+    }
+    .preview-panel pre {
+      background: #1e293b;
+      border-radius: 10px;
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 20px 0;
+    }
+    .preview-panel pre code {
+      background: none;
+      color: #e2e8f0;
+      font-size: 0.875rem;
+      padding: 0;
+    }
+    .preview-panel blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 18px;
+      margin: 20px 0;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .preview-panel img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 16px 0;
+    }
+    .preview-panel a { color: var(--accent); }
+    .preview-panel table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.875rem;
+    }
+    .preview-panel th, .preview-panel td {
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      text-align: left;
+    }
+    .preview-panel th { background: var(--bg); font-weight: 600; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 320px;
+      flex-shrink: 0;
+      margin-left: 24px;
+      position: sticky;
+      top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .sidebar-card h3 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .meta-row:last-child { border-bottom: none; }
+    .meta-row span:last-child { color: var(--text); font-weight: 500; }
+
+    /* Approve button */
+    .btn-approve {
+      display: block;
+      width: 100%;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-approve:hover { background: #15803d; }
+    .btn-approve:active { transform: scale(0.98); }
+
+    /* Reject button */
+    .btn-reject {
+      display: block;
+      width: 100%;
+      background: transparent;
+      color: var(--red);
+      border: 1.5px solid #fca5a5;
+      border-radius: 10px;
+      padding: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-reject:hover { background: var(--red-light); border-color: var(--red); }
+
+    /* Feedback form (hidden by default) */
+    .feedback-form {
+      display: none;
+      margin-top: 14px;
+    }
+    .feedback-form.visible { display: block; }
+
+    .feedback-form label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .feedback-form textarea {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      resize: vertical;
+      min-height: 90px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .feedback-form textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    .btn-send-feedback {
+      margin-top: 10px;
+      display: block;
+      width: 100%;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-send-feedback:hover { background: #b91c1c; }
+
+    .revision-warning {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      color: #92400e;
+    }
+
+    .max-revisions-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <span class="logo">Blog Writer AI</span>
+      <span class="badge">Review</span>
+    </div>
+    <span class="header-meta">
+      {% if revision_count > 0 %}Revision {{ revision_count }} of {{ max_revisions }}{% else %}First draft{% endif %}
+    </span>
+  </header>
+
+  <div class="page-wrap">
+    <!-- Blog Preview -->
+    <div class="preview-panel" id="preview">
+      Loading…
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+      <!-- Meta info -->
+      <div class="sidebar-card">
+        <h3>Blog info</h3>
+        <div class="meta-row"><span>Title</span><span>{{ plan_title }}</span></div>
+        <div class="meta-row"><span>Topic</span><span>{{ topic[:40] }}{% if topic|length > 40 %}…{% endif %}</span></div>
+        <div class="meta-row"><span>Revisions</span><span>{{ revision_count }} / {{ max_revisions }}</span></div>
+        <div class="meta-row"><span>Words</span><span id="word-count">–</span></div>
+      </div>
+
+      <!-- Approve -->
+      <div class="sidebar-card">
+        <h3>Decision</h3>
+
+        {% if revision_count > 0 %}
+        <div class="revision-warning" style="margin-bottom: 14px;">
+          This is revision {{ revision_count }}. You have {{ max_revisions - revision_count }} rewrite{{ 's' if (max_revisions - revision_count) != 1 else '' }} remaining.
+        </div>
+        {% endif %}
+
+        <form method="post" action="/approve/{{ job_id }}">
+          <button type="submit" class="btn-approve">&#10003;&nbsp; Approve &amp; Publish</button>
+        </form>
+
+        <div style="margin-top: 12px;">
+          {% if revision_count < max_revisions %}
+            <button class="btn-reject" onclick="toggleFeedback()">&#10007;&nbsp; Reject &amp; Rewrite</button>
+
+            <form class="feedback-form" id="feedback-form" method="post" action="/reject/{{ job_id }}">
+              <label for="feedback">What needs to change?</label>
+              <textarea
+                id="feedback"
+                name="feedback"
+                placeholder="e.g. The intro is too long. Add a code example in section 3. Tone should be more casual."
+                required
+              ></textarea>
+              <button type="submit" class="btn-send-feedback">Send for rewrite &rarr;</button>
+            </form>
+          {% else %}
+            <button class="btn-reject" disabled style="opacity: 0.4; cursor: not-allowed;">Max revisions reached</button>
+          {% endif %}
+        </div>
+
+        <p class="max-revisions-note">
+          Approving will publish to Hashnode &amp; LinkedIn.
+        </p>
+      </div>
+
+      <!-- Copy raw markdown -->
+      <div class="sidebar-card">
+        <h3>Export</h3>
+        <button
+          onclick="copyMarkdown()"
+          style="width:100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 0.85rem; cursor: pointer; font-family: 'Inter', sans-serif; color: var(--text);"
+        >
+          Copy Markdown
+        </button>
+        <p id="copy-msg" style="font-size:0.78rem; color: var(--green); margin-top: 6px; display: none;">Copied!</p>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const RAW_MD = {{ content | tojson }};
+
+    // Render markdown
+    marked.setOptions({ gfm: true, breaks: false });
+    document.getElementById('preview').innerHTML = marked.parse(RAW_MD);
+
+    // Word count
+    const words = RAW_MD.trim().split(/\s+/).length;
+    document.getElementById('word-count').textContent = words.toLocaleString();
+
+    function toggleFeedback() {
+      const form = document.getElementById('feedback-form');
+      form.classList.toggle('visible');
+      if (form.classList.contains('visible')) {
+        document.getElementById('feedback').focus();
+      }
+    }
+
+    function copyMarkdown() {
+      navigator.clipboard.writeText(RAW_MD).then(() => {
+        const msg = document.getElementById('copy-msg');
+        msg.style.display = 'block';
+        setTimeout(() => { msg.style.display = 'none'; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generating&hellip; &mdash; Blog Writer AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,700;1,400&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8f7f4;
+      --surface: #ffffff;
+      --border: #e4e2dc;
+      --text: #1a1a18;
+      --muted: #6b6860;
+      --accent: #2563eb;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--text);
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header .logo { font-family: 'Merriweather', serif; font-size: 1.2rem; color: #fff; }
+    header .badge { background: var(--accent); color: #fff; font-size: 0.65rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 56px 48px;
+      width: 100%;
+      max-width: 560px;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+
+    .spinner-wrap {
+      margin: 0 auto 32px;
+      width: 64px;
+      height: 64px;
+      position: relative;
+    }
+
+    .spinner {
+      width: 64px;
+      height: 64px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    h2 {
+      font-family: 'Merriweather', serif;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .topic-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    .topic-label strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .steps {
+      list-style: none;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      background: var(--bg);
+      color: var(--muted);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .step.active {
+      background: #eff6ff;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .step.done {
+      color: #16a34a;
+      background: #f0fdf4;
+    }
+
+    .step-icon {
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .step.active .step-icon::before { content: "⟳"; animation: spin 1s linear infinite; display: inline-block; }
+    .step.done .step-icon::before  { content: "✓"; }
+    .step:not(.active):not(.done) .step-icon::before { content: "○"; }
+
+    .note {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .error-box {
+      display: none;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 14px 18px;
+      color: #dc2626;
+      font-size: 0.875rem;
+      margin-top: 20px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="logo">Blog Writer AI</span>
+    <span class="badge">LangGraph</span>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="spinner-wrap">
+        <div class="spinner"></div>
+      </div>
+
+      <h2 id="heading">
+        {% if is_rewriting %}Rewriting your blog…{% else %}Writing your blog…{% endif %}
+      </h2>
+      <p class="topic-label">
+        Topic: <strong>{{ topic }}</strong>
+        {% if revision_count > 0 %}
+          <br /><span style="color: var(--accent);">Revision {{ revision_count }}</span>
+        {% endif %}
+      </p>
+
+      <ul class="steps" id="steps">
+        {% if not is_rewriting %}
+        <li class="step active" data-step="router">
+          <span class="step-icon"></span>
+          Routing &amp; deciding research mode
+        </li>
+        <li class="step" data-step="research">
+          <span class="step-icon"></span>
+          Searching the web for evidence
+        </li>
+        <li class="step" data-step="orchestrator">
+          <span class="step-icon"></span>
+          Planning blog structure
+        </li>
+        <li class="step" data-step="worker">
+          <span class="step-icon"></span>
+          Writing sections in parallel
+        </li>
+        <li class="step" data-step="reducer">
+          <span class="step-icon"></span>
+          Merging content &amp; adding images
+        </li>
+        {% else %}
+        <li class="step active" data-step="rewrite">
+          <span class="step-icon"></span>
+          Revising with your feedback
+        </li>
+        {% endif %}
+      </ul>
+
+      <div id="error-box" class="error-box"></div>
+
+      <p class="note">This usually takes 1&ndash;3 minutes depending on topic complexity.</p>
+    </div>
+  </main>
+
+  <script>
+    const JOB_ID = "{{ job_id }}";
+    const IS_REWRITING = {{ 'true' if is_rewriting else 'false' }};
+    const steps = document.querySelectorAll('.step');
+    let stepIndex = 0;
+
+    // Cycle through visual steps to show progress
+    const stepOrder = IS_REWRITING
+      ? ['rewrite']
+      : ['router', 'research', 'orchestrator', 'worker', 'reducer'];
+
+    function activateStep(name) {
+      steps.forEach(el => {
+        if (el.dataset.step === name) {
+          el.classList.add('active');
+          el.classList.remove('done');
+        }
+      });
+    }
+
+    function doneStep(name) {
+      steps.forEach(el => {
+        if (el.dataset.step === name) {
+          el.classList.remove('active');
+          el.classList.add('done');
+        }
+      });
+    }
+
+    // Auto-advance steps every few seconds just for UX feel
+    let uiInterval;
+    if (!IS_REWRITING) {
+      uiInterval = setInterval(() => {
+        if (stepIndex < stepOrder.length - 1) {
+          doneStep(stepOrder[stepIndex]);
+          stepIndex++;
+          activateStep(stepOrder[stepIndex]);
+        }
+      }, 18000); // advance every 18s (rough avg per step)
+    }
+
+    async function poll() {
+      try {
+        const resp = await fetch(`/status/${JOB_ID}`);
+        const data = await resp.json();
+
+        if (data.status === 'ready') {
+          clearInterval(uiInterval);
+          stepOrder.forEach(s => doneStep(s));
+          setTimeout(() => {
+            window.location.href = `/review/${JOB_ID}`;
+          }, 600);
+        } else if (data.status === 'error') {
+          clearInterval(uiInterval);
+          document.getElementById('heading').textContent = 'Something went wrong';
+          const box = document.getElementById('error-box');
+          box.style.display = 'block';
+          box.textContent = data.error || 'An unexpected error occurred. Please try again.';
+        } else {
+          setTimeout(poll, 2500);
+        }
+      } catch (e) {
+        setTimeout(poll, 3000);
+      }
+    }
+
+    poll();
+  </script>
+</body>
+</html>
