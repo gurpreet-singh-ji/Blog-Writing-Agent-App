@@ -6,15 +6,15 @@ from datetime import date
 from pathlib import Path
 
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from langchain_core.messages import HumanMessage, SystemMessage
+from jinja2 import Environment, FileSystemLoader
 
 from blog_agent import blog_graph, llm
 
 app = FastAPI(title="Blog Writer AI")
-templates = Jinja2Templates(directory="templates")
+jinja_env = Environment(loader=FileSystemLoader("templates"))
 
 images_dir = Path("images")
 images_dir.mkdir(exist_ok=True)
@@ -76,7 +76,8 @@ def _run_rewrite(job_id: str, feedback: str) -> None:
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    template = jinja_env.get_template("index.html")
+    return template.render(request=request)
 
 
 @app.post("/generate")
@@ -98,13 +99,14 @@ async def generating_page(request: Request, job_id: str):
     job = jobs.get(job_id)
     if not job:
         return RedirectResponse("/")
-    return templates.TemplateResponse("generating.html", {
-        "request": request,
-        "job_id": job_id,
-        "topic": job["topic"],
-        "is_rewriting": job.get("revision_count", 0) > 0,
-        "revision_count": job.get("revision_count", 0),
-    })
+    template = jinja_env.get_template("generating.html")
+    return template.render(
+        request=request,
+        job_id=job_id,
+        topic=job["topic"],
+        is_rewriting=job.get("revision_count", 0) > 0,
+        revision_count=job.get("revision_count", 0),
+    )
 
 
 @app.get("/status/{job_id}")
@@ -126,15 +128,16 @@ async def review_page(request: Request, job_id: str):
         return RedirectResponse("/")
     if job["status"] not in ("ready", "approved"):
         return RedirectResponse(f"/generating/{job_id}")
-    return templates.TemplateResponse("review.html", {
-        "request": request,
-        "job_id": job_id,
-        "topic": job["topic"],
-        "plan_title": job["plan_title"],
-        "content": job["final"],
-        "revision_count": job.get("revision_count", 0),
-        "max_revisions": 3,
-    })
+    template = jinja_env.get_template("review.html")
+    return template.render(
+        request=request,
+        job_id=job_id,
+        topic=job["topic"],
+        plan_title=job["plan_title"],
+        content=job["final"],
+        revision_count=job.get("revision_count", 0),
+        max_revisions=3,
+    )
 
 
 @app.post("/reject/{job_id}")
@@ -161,11 +164,12 @@ async def approve_blog(job_id: str):
 @app.get("/success/{job_id}", response_class=HTMLResponse)
 async def success_page(request: Request, job_id: str):
     job = jobs.get(job_id, {})
-    return templates.TemplateResponse("success.html", {
-        "request": request,
-        "job_id": job_id,
-        "topic": job.get("topic", ""),
-        "plan_title": job.get("plan_title", ""),
-        "revision_count": job.get("revision_count", 0),
-        "content": job.get("final", ""),
-    })
+    template = jinja_env.get_template("success.html")
+    return template.render(
+        request=request,
+        job_id=job_id,
+        topic=job.get("topic", ""),
+        plan_title=job.get("plan_title", ""),
+        revision_count=job.get("revision_count", 0),
+        content=job.get("final", ""),
+    )

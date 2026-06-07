@@ -9,15 +9,17 @@ from typing import Annotated, List, Literal, Optional, TypedDict
 
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send
 from pydantic import BaseModel, Field
 
 load_dotenv()
 
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1")
-llm = ChatOllama(model=OLLAMA_MODEL, temperature=0.7)
+# Use OpenAI API (or change to another provider)
+LLM_MODEL = os.getenv("LLM_MODEL", "gpt-3.5-turbo")
+LLM_API_KEY = os.getenv("OPENAI_API_KEY")
+llm = ChatOpenAI(model=LLM_MODEL, temperature=0.7, api_key=LLM_API_KEY)
 
 
 # ─────────────────────────────────────────────────────────────
